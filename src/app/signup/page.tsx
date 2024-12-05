@@ -6,16 +6,42 @@ import Link from "next/link";
 import { BackgroundWrapper } from "../../components/BackgroundWrapper";
 import { motion } from "framer-motion";
 import { ArrowLeft } from "lucide-react";
+import { createUser } from "../../service/api";
+import { formatPhoneNumber, removePhoneMask } from "../../components/util/formatPhoneNumber";
 
 export default function SignupPage() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [phone, setPhone] = useState("");
+  const [category, setCategory] = useState("");
   const router = useRouter();
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    router.push("/dashboard");
+
+    const sanitizedPhone = removePhoneMask(phone);
+
+    // Dados do usuário
+    const userData = {
+      name,
+      email,
+      password,
+      phone: sanitizedPhone,
+      category,
+    };
+
+    try {
+      // Chama a API para criar o usuário
+      const response = await createUser(userData);
+      console.log("Usuário criado com sucesso:", response);
+
+      // Redireciona para o dashboard após sucesso
+      router.push("/dashboard");
+    } catch (error) {
+      console.error("Erro ao criar usuário:", error);
+      alert("Houve um erro ao tentar criar a conta. Tente novamente.");
+    }
   };
 
   return (
@@ -52,7 +78,7 @@ export default function SignupPage() {
                   htmlFor="name"
                   className="block text-sm font-medium text-gray-700"
                 >
-                  Nome
+                  Nome Fantasia
                 </label>
                 <div className="mt-1">
                   <input
@@ -84,6 +110,45 @@ export default function SignupPage() {
                     required
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
+                    className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label
+                  htmlFor="phone"
+                  className="block text-sm font-medium text-gray-700"
+                >
+                  Telefone
+                </label>
+                <div className="mt-1">
+                  <input
+                    id="phone"
+                    name="phone"
+                    type="tel"
+                    value={phone}
+                    onChange={(e) => setPhone(formatPhoneNumber(e.target.value))}
+                    maxLength={15}
+                    className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label
+                  htmlFor="category"
+                  className="block text-sm font-medium text-gray-700"
+                >
+                  Categoria
+                </label>
+                <div className="mt-1">
+                  <input
+                    id="category"
+                    name="category"
+                    type="text"
+                    value={category}
+                    onChange={(e) => setCategory(e.target.value)}
                     className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
                   />
                 </div>
