@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { BackgroundWrapper } from "../../components/BackgroundWrapper";
 import { motion } from "framer-motion";
+import { ArrowLeft } from "lucide-react";
 
 export default function SignupPage() {
   const [name, setName] = useState("");
@@ -38,6 +39,13 @@ export default function SignupPage() {
           transition={{ duration: 0.5, delay: 0.1 }}
         >
           <div className="bg-white/90 backdrop-blur-sm py-8 px-4 shadow-xl rounded-lg sm:px-10">
+            <Link
+              href="/"
+              className="inline-flex items-center text-indigo-600 hover:text-indigo-800 mb-6"
+            >
+              <ArrowLeft className="mr-2 h-5 w-5" />
+              Voltar
+            </Link>
             <form className="space-y-6" onSubmit={handleSubmit}>
               <div>
                 <label

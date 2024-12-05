@@ -5,6 +5,7 @@ import HowItWorks from "../components/HowItWorks";
 import CTA from "../components/CTA";
 import ContactForm from "../components/ContactForm";
 import Footer from "../components/Footer";
+import { FloatingButtons } from "../components/FloatingButtons";
 
 export default function Home() {
   return (
@@ -12,12 +13,19 @@ export default function Home() {
       <Navbar />
       <main className="flex-grow">
         <Hero />
-        <Features />
-        <HowItWorks />
-        <CTA />
+        <div id="features">
+          <Features />
+        </div>
+        <div id="how-it-works">
+          <HowItWorks />
+        </div>
+        <div id="plans">
+          <CTA />
+        </div>
         <ContactForm />
       </main>
       <Footer />
+      <FloatingButtons />
     </div>
   );
 }
