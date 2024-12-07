@@ -15,6 +15,7 @@ import {
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { ThemeToggle } from "./ThemeToggle";
+import Cookies from 'js-cookie'; 
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
@@ -24,6 +25,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
   const [isExpanded, setIsExpanded] = useState(true);
   const pathname = usePathname();
   const router = useRouter();
+  
 
   const menuItems = [
     { icon: LayoutDashboard, label: "Dashboard", href: "/dashboard" },
@@ -33,7 +35,9 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
   ];
 
   const handleLogout = () => {
-    // usado para limpar qual quer token de autenticação e redirecionar para a página inicial.
+    Cookies.remove('userAuthenticated');
+    Cookies.remove('authToken'); 
+    console.log("deslogando")
     router.push("/");
   };
 
