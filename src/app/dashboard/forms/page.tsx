@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import Link from "next/link";
 import { getTemplates, getCreatedForms } from "../../../service/template";
+import Cookies from "js-cookie";
 
 export default function FormsPage() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -18,12 +19,12 @@ export default function FormsPage() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const token = localStorage.getItem("authToken");
-        const userId = localStorage.getItem("userId");
+        const authToken = Cookies.get("authToken");
+        const userAuthenticated = JSON.parse(Cookies.get("userAuthenticated"));
 
         const [templatesResponse, forms] = await Promise.all([
-          getTemplates(token), // Agora retorna no formato { templates: { segmentName: [...] } }
-          getCreatedForms(userId, token),
+          getTemplates(authToken), // Agora retorna no formato { templates: { segmentName: [...] } }
+          getCreatedForms(userAuthenticated.id, authToken, 0, 10),
         ]);
 
         setTemplatesBySegment(templatesResponse.templates || {});
@@ -56,7 +57,7 @@ export default function FormsPage() {
   const filteredTemplatesBySegment = filterTemplatesBySegment();
 
   const filteredForms = createdForms.filter((form) =>
-    form.title.toLowerCase().includes(searchTerm.toLowerCase())
+    form.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   if (loading) {
@@ -108,7 +109,7 @@ export default function FormsPage() {
                     </CardHeader>
                     <CardContent>
                       <p className="text-sm text-gray-500 mb-4">
-                        Segmento - {template.segment.description}<br/>
+                        Segmento - {template.segment.description}<br />
                         {template.description}
                       </p>
                       <Button asChild className="w-full">
@@ -147,12 +148,16 @@ export default function FormsPage() {
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2">
                       <FilePlus className="h-5 w-5 text-green-500" />
-                      {form.title}
+                      {form.name}
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
                     <p className="text-sm text-gray-500 mb-4">
-                      Criada em: {form.date}
+                      Segmento: {form.segment.name}<br/>
+                      {form.segment.description}
+                    </p>
+                    <p className="text-sm text-gray-500 mb-4">
+                      {form.description}
                     </p>
                     <Button asChild className="w-full">
                       <Link href={`/dashboard/edit-form?id=${form.id}`}>

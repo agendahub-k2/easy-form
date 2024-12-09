@@ -37,6 +37,8 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
   const handleLogout = () => {
     Cookies.remove('userAuthenticated');
     Cookies.remove('authToken'); 
+    localStorage.removeItem('userAuthenticated');
+    localStorage.removeItem('authToken');
     console.log("deslogando")
     router.push("/");
   };
@@ -113,7 +115,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
                   exit={{ opacity: 0, width: 0 }}
                   className="whitespace-nowrap"
                 >
-                  Nova Ficha
+                  Preencher Ficha
                 </motion.span>
               )}
             </AnimatePresence>

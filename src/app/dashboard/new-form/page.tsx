@@ -11,7 +11,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
-import { getTemplateById } from "../../../service/template";
+import { getTemplateById, createRecord } from "../../../service/template";
+import { useRouter } from "next/navigation";
 
 export default function NewFormPage() {
   const searchParams = useSearchParams();
@@ -22,6 +23,8 @@ export default function NewFormPage() {
   const [descricaoSegmento, setDescricaoSegmento] = useState("");
   const [fields, setFields] = useState([]);
   const [loading, setLoading] = useState(true);
+
+  const router = useRouter();
 
   useEffect(() => {
     if (!templateId) return;
@@ -47,11 +50,44 @@ export default function NewFormPage() {
     fetchTemplate();
   }, [templateId]);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log({ formTitle, segmento, descricaoSegmento, description, fields });
-    // Here you would typically send this data to your backend
+  
+    const token = Cookies.get("authToken");
+    const userAuthenticated = JSON.parse(Cookies.get("userAuthenticated"));
+  
+    // Transformando os dados no formato necessário
+    const data = {
+      name: formTitle,
+      templateId, // Certifique-se que templateId está vindo corretamente de useSearchParams
+      segment: {
+        name: segmento,
+        description: descricaoSegmento,
+      },
+      description,
+      questions: fields.map((field) => ({
+        id: field.id,
+        createdAt: new Date().toISOString(),
+        updateAt: new Date().toISOString(),
+        question: field.question,
+        section: field.section,
+        descriptionSection: field.descriptionSection,
+        isRequired: field.isRequired,
+        questionType: field.questionType,
+      })),
+    };
+  
+    try {
+      console.log(token);
+      const response = await createRecord(token, userAuthenticated.id, data);
+      alert("Ficha cadastrada!");
+      router.push("/dashboard/forms");
+    } catch (error) {
+      console.error("Erro ao criar registro:", error);
+      alert("Erro ao criar ficha!");
+    }
   };
+  
 
   if (loading) {
     return <div>Carregando...</div>;
