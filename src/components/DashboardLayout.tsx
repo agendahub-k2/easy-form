@@ -15,6 +15,7 @@ import {
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { ThemeToggle } from "./ThemeToggle";
+import Cookies from 'js-cookie'; 
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
@@ -24,6 +25,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
   const [isExpanded, setIsExpanded] = useState(true);
   const pathname = usePathname();
   const router = useRouter();
+  
 
   const menuItems = [
     { icon: LayoutDashboard, label: "Dashboard", href: "/dashboard" },
@@ -33,7 +35,11 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
   ];
 
   const handleLogout = () => {
-    // usado para limpar qual quer token de autenticação e redirecionar para a página inicial.
+    Cookies.remove('userAuthenticated');
+    Cookies.remove('authToken'); 
+    localStorage.removeItem('userAuthenticated');
+    localStorage.removeItem('authToken');
+    console.log("deslogando")
     router.push("/");
   };
 
@@ -97,7 +103,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
 
         <div className="absolute bottom-4 left-0 right-0 px-2">
           <Link
-            href="/dashboard/new-form"
+            href="/dashboard/new-record"
             className={`flex items-center gap-2 px-3 py-2 rounded-lg mb-1 bg-indigo-600 text-white hover:bg-indigo-700 transition-colors duration-200`}
           >
             <Plus className="h-5 w-5 flex-shrink-0" />
@@ -109,7 +115,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
                   exit={{ opacity: 0, width: 0 }}
                   className="whitespace-nowrap"
                 >
-                  Nova Ficha
+                  Preencher Ficha
                 </motion.span>
               )}
             </AnimatePresence>
