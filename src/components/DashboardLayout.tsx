@@ -103,7 +103,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
 
         <div className="absolute bottom-4 left-0 right-0 px-2">
           <Link
-            href="/dashboard/new-form"
+            href="/dashboard/new-record"
             className={`flex items-center gap-2 px-3 py-2 rounded-lg mb-1 bg-indigo-600 text-white hover:bg-indigo-700 transition-colors duration-200`}
           >
             <Plus className="h-5 w-5 flex-shrink-0" />
