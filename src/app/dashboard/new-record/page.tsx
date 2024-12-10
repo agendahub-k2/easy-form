@@ -6,6 +6,7 @@ import { Search, FileText, User, Mail, Phone, Calendar } from 'lucide-react'
 import { Input } from "@/components/ui/input"
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
+import { Textarea } from "@/components/ui/textarea"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { useDebounce } from 'use-debounce'
 import { searchPatientsByName } from '../../../service/api'
@@ -15,6 +16,7 @@ import { Patient, Form, SearchResponse, SelectedItems } from '../types'
 
 export default function NewRecord() {
   const [searchTerm, setSearchTerm] = useState('')
+  const [message, setMessage] = useState('')
   const [debouncedSearch] = useDebounce(searchTerm, 500)
   const [patients, setPatients] = useState<Patient[]>([])
   const [forms, setForms] = useState<Form[]>([])
@@ -31,7 +33,7 @@ export default function NewRecord() {
     try {
       setLoading(true)
       setError(null)
-      
+
       const authToken = Cookies.get("authToken")
       const userAuthenticated = JSON.parse(Cookies.get("userAuthenticated"))
 
@@ -56,7 +58,7 @@ export default function NewRecord() {
     try {
       setLoading(true)
       setError(null)
-      
+
       const authToken = Cookies.get("authToken")
       const userAuthenticated = JSON.parse(Cookies.get("userAuthenticated"))
 
@@ -76,7 +78,7 @@ export default function NewRecord() {
       } else {
         response = await getCreatedForms(userAuthenticated.id, authToken, 0, 4)
       }
-      
+
       setForms(response.content.slice(0, 4))
     } catch (err) {
       setError('Erro ao buscar fichas. Por favor, tente novamente.')
@@ -266,7 +268,21 @@ export default function NewRecord() {
               </div>
             )}
 
-            <Button 
+            <div>
+              <label htmlFor="message" className="font-semibold">
+                Mensagem
+              </label>
+              <Textarea
+                id="message"
+                value={message}
+                onChange={(e) => setMessage(e.target.value)}
+                placeholder="Digite sua mensagem aqui"
+                className="mt-2"
+                rows={2}
+              />
+            </div>
+
+            <Button
               className="w-full"
               disabled={!selected.patient || !selected.form}
               onClick={() => console.log('Enviar ficha:', selected)}
