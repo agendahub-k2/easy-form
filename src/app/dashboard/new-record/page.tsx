@@ -275,7 +275,7 @@ export default function NewRecord() {
             )}
 
             <div className="flex items-center space-x-2">
-              <label className="font-semibold">Data Retorno</label>
+              <label className="font-semibold">Data de expiração</label>
               <Switch checked={checked} onChange={handleChange} />
             </div>
 
