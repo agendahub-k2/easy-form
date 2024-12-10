@@ -79,3 +79,25 @@ export const getCreatedForms = async (userId, token, page, size) => {
       throw error;
     }
   };
+
+
+  export const getTemplateByName = async (userId, name ,token) => {
+    try {
+        const url = `${API_URL}/${userId}/record/find?name=${name}`;
+        const response = await fetch(url, {
+            method: "GET",
+            headers: {
+                "Authorization": `Bearer ${token}`,
+            },
+        });
+  
+        if (!response.ok) {
+            throw new Error("Erro ao buscar fichas criadas by name");
+        }
+  
+        return await response.json(); // Retorna os dados JSON da resposta
+    } catch (error) {
+        console.error("Erro ao buscar fichas criadas by name:", error);
+        return []; // Retorna vazio em caso de erro
+    }
+  };
