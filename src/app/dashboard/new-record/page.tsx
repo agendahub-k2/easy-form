@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation"
 import { Search, FileText, User, Mail, Phone, Calendar } from 'lucide-react'
 import { Input } from "@/components/ui/input"
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
+import Switch from 'react-switch'
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
@@ -17,6 +18,7 @@ import { Patient, Form, SearchResponse, SelectedItems } from '../types'
 export default function NewRecord() {
   const [searchTerm, setSearchTerm] = useState('')
   const [message, setMessage] = useState('')
+  const [checked, setChecked] = useState(false)
   const [debouncedSearch] = useDebounce(searchTerm, 500)
   const [patients, setPatients] = useState<Patient[]>([])
   const [forms, setForms] = useState<Form[]>([])
@@ -28,6 +30,10 @@ export default function NewRecord() {
   const [error, setError] = useState<string | null>(null)
   const [activeTab, setActiveTab] = useState('patients')
   const router = useRouter()
+
+  const handleChange = (nextChecked: boolean) => {
+    setChecked(nextChecked)
+  }
 
   const searchPatients = async () => {
     try {
@@ -267,6 +273,11 @@ export default function NewRecord() {
                 </div>
               </div>
             )}
+
+            <div className="flex items-center space-x-2">
+              <label className="font-semibold">Data Retorno</label>
+              <Switch checked={checked} onChange={handleChange} />
+            </div>
 
             <div>
               <label htmlFor="message" className="font-semibold">
