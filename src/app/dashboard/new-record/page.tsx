@@ -18,6 +18,7 @@ import { Patient, Form, SearchResponse, SelectedItems } from '../types'
 export default function NewRecord() {
   const [searchTerm, setSearchTerm] = useState('')
   const [message, setMessage] = useState('')
+  const [whatsappChecked, setWhatsappChecked] = useState(true)
   const [checked, setChecked] = useState(false)
   const [debouncedSearch] = useDebounce(searchTerm, 500)
   const [patients, setPatients] = useState<Patient[]>([])
@@ -34,6 +35,67 @@ export default function NewRecord() {
   const handleChange = (nextChecked: boolean) => {
     setChecked(nextChecked)
   }
+
+  const handleSendRecord = async () => {
+    // Primeiro, chama o serviço da API para enviar o record
+    try {
+      const response = await fetch('http://localhost:8080/1/record/send', {
+        method: 'POST',
+        headers: {
+          'Authorization': 'Bearer ' + Cookies.get('authToken'), // Autenticação
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          recordId: 1,
+          message: message,
+          isSendWhatsapp: whatsappChecked,
+          isSendMail: false, // Se você deseja enviar por e-mail, altere para true
+          clientId: selected.patient?.id
+        }),
+      })
+      
+      // Espera a resposta da API
+      const data = await response.json();
+      
+
+      if (response.ok) {
+        // Se o retorno da API for OK, chama o WhatsApp
+        if (whatsappChecked) {
+          handleWhatsAppLink(data.url)
+        }
+      } else {
+        console.error('Erro na API:', data)
+        setError('Erro ao enviar ficha. Tente novamente.')
+      }
+    } catch (err) {
+      console.error('Erro ao chamar o serviço de envio:', err)
+      setError('Erro ao enviar ficha. Tente novamente.')
+    }
+  }
+
+
+  const mensagemWhatsapp = () => {
+    // Correção na interpolação de string
+    return `Olá ${selected.patient?.name}, segue link para preenchimento: \n ${selected.form?.name}`;
+  };
+
+
+  const handleWhatsAppLink = (url) => {
+    if (selected.patient && selected.patient.phone && selected.form) {
+      // Formatar a mensagem para o WhatsApp, incluindo a mensagem personalizada
+      const phoneNumber = selected.patient.phone.replace(/[^\d]/g, '');
+      
+      // Combina a mensagem do WhatsApp com a mensagem personalizada
+      const messageText = `${mensagemWhatsapp()} \n ${url} \n\n${message}`;
+
+  
+      // Gerar o link do WhatsApp
+      const whatsappLink = `https://wa.me/55${phoneNumber}?text=${encodeURIComponent(messageText)}`;
+  
+      // Redirecionar para o WhatsApp
+      window.open(whatsappLink, '_blank');
+    }
+  };
 
   const searchPatients = async () => {
     try {
@@ -58,6 +120,10 @@ export default function NewRecord() {
     } finally {
       setLoading(false)
     }
+  }
+
+  const handleWhatsappChange = (nextChecked: boolean) => {
+    setWhatsappChecked(nextChecked)
   }
 
   const searchForms = async () => {
@@ -279,6 +345,11 @@ export default function NewRecord() {
               <Switch checked={checked} onChange={handleChange} />
             </div>
 
+            <div className="flex items-center space-x-2">
+              <label className="font-semibold">Enviar pelo WhatsApp</label>
+              <Switch checked={whatsappChecked} onChange={handleWhatsappChange} />
+            </div>
+
             <div>
               <label htmlFor="message" className="font-semibold">
                 Mensagem
@@ -296,7 +367,7 @@ export default function NewRecord() {
             <Button
               className="w-full"
               disabled={!selected.patient || !selected.form}
-              onClick={() => console.log('Enviar ficha:', selected)}
+              onClick={handleSendRecord}
             >
               Enviar ficha para o cliente
             </Button>
