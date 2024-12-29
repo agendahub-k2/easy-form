@@ -21,7 +21,15 @@ export default function NewFormPage() {
   const [description, setDescription] = useState("");
   const [segmento, setSegmento] = useState("");
   const [descricaoSegmento, setDescricaoSegmento] = useState("");
-  const [fields, setFields] = useState([]);
+  const [fields, setFields] = useState<Array<{
+    id: number;
+    questionType: string;
+    question: string;
+    section: number;
+    descriptionSection: string;
+    isRequired: boolean;
+    options?: string[];
+  }>>([]);
   const [loading, setLoading] = useState(true);
 
   const router = useRouter();
@@ -52,7 +60,19 @@ export default function NewFormPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-  
+
+    // Validação das opções para campos de seleção
+    const invalidFields = fields.filter(field => 
+      field.questionType === "SELECT" && (!field.options || field.options.length < 2)
+    );
+
+    console.log(invalidFields)
+
+    if (invalidFields.length > 0) {
+      alert("Por favor, adicione opções para todos os campos de seleção.");
+      return;
+    }
+
     const token = Cookies.get("authToken");
     const userAuthenticated = JSON.parse(Cookies.get("userAuthenticated"));
   
@@ -74,11 +94,12 @@ export default function NewFormPage() {
         descriptionSection: field.descriptionSection,
         isRequired: field.isRequired,
         questionType: field.questionType,
+        options: field.options
       })),
     };
   
     try {
-      console.log(token);
+      console.log(data);
       const response = await createRecord(token, userAuthenticated.id, data);
       alert("Ficha cadastrada!");
       router.push("/dashboard/forms");
@@ -210,7 +231,27 @@ export default function NewFormPage() {
                         <option value="SELECT">Seleção</option>
                         <option value="NUMBER">Número</option>
                         <option value="BOOLEAN">Sim/Não</option>
+                        <option value="DATE">Data</option>
                       </select>
+                      {field.questionType === "SELECT" && (
+                        <div className="flex-1 ml-4">
+                          <Input
+                            placeholder="Opções (separadas por ponto e vírgula)"
+                            value={field.options?.join("; ") || ""}
+                            onChange={(e) => {
+                              const newFields = [...fields];
+                              const fieldIndex = newFields.findIndex(f => f.id === field.id);
+                              newFields[fieldIndex].options = e.target.value.split(",").map(opt => opt.trim());
+                              setFields(newFields);
+                            }}
+                            className={field.options?.length === 0 ? "border-red-500" : ""}
+                            required
+                          />
+                          {field.options?.length === 0 && (
+                            <p className="text-red-500 text-sm mt-1">Opções são obrigatórias para campos de seleção</p>
+                          )}
+                        </div>
+                      )}
                       <div className="flex items-center space-x-2">
                         <Checkbox
                           id={`required-${field.id}`}
@@ -258,6 +299,7 @@ export default function NewFormPage() {
                     section: lastField ? lastField.section : 1,
                     descriptionSection: lastField ? lastField.descriptionSection : "Nova Seção",
                     isRequired: false,
+                    options: [],
                   },
                 ]);
               }}

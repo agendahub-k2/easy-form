@@ -11,9 +11,10 @@ import { Textarea } from "@/components/ui/textarea"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { useDebounce } from 'use-debounce'
 import { searchPatientsByName } from '../../../service/api'
+import { sendRecord } from '../../../service/record'
 import { getCreatedForms, getTemplateByName } from '../../../service/template'
 import Cookies from 'js-cookie'
-import { Patient, Form, SearchResponse, SelectedItems } from '../types'
+import { Patient, Form, SelectedItems } from '../types'
 
 export default function NewRecord() {
   const [searchTerm, setSearchTerm] = useState('')
@@ -39,30 +40,28 @@ export default function NewRecord() {
   const handleSendRecord = async () => {
     // Primeiro, chama o serviço da API para enviar o record
     try {
-      const response = await fetch('http://localhost:8080/1/record/send', {
-        method: 'POST',
-        headers: {
-          'Authorization': 'Bearer ' + Cookies.get('authToken'), // Autenticação
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          recordId: 1,
-          message: message,
-          isSendWhatsapp: whatsappChecked,
-          isSendMail: false, // Se você deseja enviar por e-mail, altere para true
-          clientId: selected.patient?.id
-        }),
-      })
-      
-      // Espera a resposta da API
-      const data = await response.json();
-      
+      // Pegue o token de autenticação
+      const authToken = Cookies.get('authToken');
+    
 
-      if (response.ok) {
-        // Se o retorno da API for OK, chama o WhatsApp
+      // Chame a função sendRecord do serviço
+      const data = await sendRecord(
+        selected.form.id, // ID do registro
+        message, // Mensagem personalizada
+        whatsappChecked, // Enviar por WhatsApp?
+        false,
+        selected.patient?.id, // ID do paciente selecionado
+        authToken // Token de autenticação
+      );
+
+
+      if (data) {
         if (whatsappChecked) {
           handleWhatsAppLink(data.url)
         }
+        alert("Ficha enviada!");
+        await new Promise(resolve => setTimeout(resolve, 3000));
+        router.push("/dashboard");
       } else {
         console.error('Erro na API:', data)
         setError('Erro ao enviar ficha. Tente novamente.')
@@ -84,14 +83,14 @@ export default function NewRecord() {
     if (selected.patient && selected.patient.phone && selected.form) {
       // Formatar a mensagem para o WhatsApp, incluindo a mensagem personalizada
       const phoneNumber = selected.patient.phone.replace(/[^\d]/g, '');
-      
+
       // Combina a mensagem do WhatsApp com a mensagem personalizada
       const messageText = `${mensagemWhatsapp()} \n ${url} \n\n${message}`;
 
-  
+
       // Gerar o link do WhatsApp
       const whatsappLink = `https://wa.me/55${phoneNumber}?text=${encodeURIComponent(messageText)}`;
-  
+
       // Redirecionar para o WhatsApp
       window.open(whatsappLink, '_blank');
     }
