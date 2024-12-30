@@ -4,12 +4,15 @@ import { useEffect, useState } from 'react'
 import { useParams } from 'next/navigation'
 import Cookies from "js-cookie";
 import { fetchFormData } from "../../../../service/record";
+import DatePicker from "react-datepicker"; // Importa o DatePicker
+import "react-datepicker/dist/react-datepicker.css"; // Estilo do DatePicker
 
 export default function AnamnesisForm() {
   const { id } = useParams()
   const { userId } = useParams()
   const [formData, setFormData] = useState(null)
   const [loading, setLoading] = useState(true); // Estado para controle de carregamento
+  const [dateValues, setDateValues] = useState({}); // Estado para armazenar os valores das datas
 
   useEffect(() => {
     const getFormData = async () => {
@@ -27,6 +30,13 @@ export default function AnamnesisForm() {
 
     getFormData();
   }, [id, userId]); // Adicione userId como dependência do useEffect
+
+  const handleDateChange = (date: Date, questionId: string) => {
+    setDateValues((prevState) => ({
+      ...prevState,
+      [questionId]: date,
+    }));
+  };
 
   if (loading) {
     return <div className="text-center mt-10">Carregando...</div> // Mostra a mensagem de carregamento
@@ -83,6 +93,16 @@ export default function AnamnesisForm() {
                   </label>
                 ))}
               </div>
+            )}
+            {/* Campo de data */}
+            {question.questionType === "DATE" && (
+              <DatePicker
+                selected={dateValues[question.id] || null} // Usando o valor armazenado no estado
+                onChange={(date) => handleDateChange(date, question.id)} // Atualiza o estado com a data selecionada
+                className="w-full p-2 border rounded" // Estilo com Tailwind
+                required={question.isRequired} // Se o campo for obrigatório
+                dateFormat="dd/MM/yyyy" // Formato da data
+              />
             )}
           </div>
         ))}
