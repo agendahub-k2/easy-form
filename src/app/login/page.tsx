@@ -133,9 +133,7 @@ export default function LoginPage() {
         <Card className="bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm shadow-xl">
           <CardHeader>
             <CardTitle>Acesse sua conta</CardTitle>
-            <CardDescription>
-              Entre com seu email e senha ou use uma rede social
-            </CardDescription>
+            <CardDescription>Faça Login com seu email e senha.</CardDescription>
           </CardHeader>
           <CardContent>
             <Tabs defaultValue="email" className="w-full">
